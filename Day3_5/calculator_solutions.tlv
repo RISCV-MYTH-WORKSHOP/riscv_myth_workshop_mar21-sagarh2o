@@ -12,16 +12,16 @@
    m4_makerchip_module   // (Expanded in Nav-TLV pane.)
 \TLV
    |calc
-      @1
+      @0
          $reset = *reset;
+      @1
          $cnt = $reset ? 0 : (>>1$cnt + 1);
          $valid = $cnt;
          $valid_or_reset = $valid || $reset;
-         $op[1:0] = $rand3[1:0];
+         $val1[31:0] = >>2$out;
+         $val2[31:0] = $rand2[3:0];
       ?$valid_or_reset
          @1
-            $val1[31:0] = >>2$out;
-            $val2[31:0] = $rand2[3:0];
             $sum[31:0] = $val1 + $val2;
             $diff[31:0] = $val1 - $val2;
             $prod[31:0] = $val1 * $val2;
