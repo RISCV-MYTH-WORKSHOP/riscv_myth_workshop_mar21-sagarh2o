@@ -24,10 +24,14 @@
             $prod[31:0] = $val1 * $val2;
             $quot[31:0] = $val1 / $val2;
          @2
-            $out[31:0] = $valid_or_reset ?
-               ($op[1] ? ( $op[0] ? $quot : $prod) :
-               ( $op[0] ? $diff : $sum)) : 32'b0;
-         
+            $mem[31:0] = $reset ? 32'b0:
+               ($op[2:0] == 3'b101) ? $val1 : >>2$mem;
+            $out[31:0] = $reset ? 32'b0 :
+               ($op[2:0] == 3'b000) ? $sum :
+               ($op[2:0] == 3'b001) ? $diff :
+               ($op[2:0] == 3'b010) ? $prod :
+               ($op[2:0] == 3'b011) ? $quot :
+               ($op[2:0] == 3'b100) ? >>2$mem : >>2$out;
 
       // Macro instantiations for calculator visualization(disabled by default).
       // Uncomment to enable visualisation, and also,
