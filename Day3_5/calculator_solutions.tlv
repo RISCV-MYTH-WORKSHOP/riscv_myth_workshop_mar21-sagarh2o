@@ -14,18 +14,17 @@
    |calc
       @1
          $reset = *reset;
-         $val1[31:0] = $reset ? $rand1[3:0] : >>2$out;
+         $val1[31:0] = >>1$out;
          $val2[31:0] = $rand2[3:0];
-         $op[1:0] = $rand3[1:0];
          $sum[31:0] = $val1 + $val2;
          $diff[31:0] = $val1 - $val2;
          $prod[31:0] = $val1 * $val2;
          $quot[31:0] = $val1 / $val2;
-         $cnt = $reset ? 0 : (>>1$cnt + 1);
-      @2
-         $valid = $cnt;
-         $out[31:0] = ($reset | !$valid) ? 32'b0 :($op[1] ? ($op[0] ? $quot : $prod) : ($op[0] ? $diff : $sum));
-                 
+         $out[31:0] = $reset ? 32'b0 : (
+            $op[1] ? ( $op[0] ? $quot : $prod) :
+            ( $op[0] ? $diff : $sum));
+         $cnt = $reset ? 1'b0 : (>>1$cnt + 1);
+
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = *cyc_cnt > 40;
    *failed = 1'b0;
