@@ -41,6 +41,7 @@
       @0
          $reset = *reset;
          $pc[31:0] = >>1$reset ? 0 : (>>1$pc + 32'd4);
+         
       @1   
          $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
          $imem_rd_en = !$reset;
@@ -110,6 +111,12 @@
          $src1_value[31:0] = $rf_rd_data1 ;
          $src2_value[31:0] = $rf_rd_data2 ;
          
+         $result[31:0] = $is_addi ? $src1_value + $imm :
+                         $is_add ? $src1_value + $src2_value : 32'bx;
+         
+         $rf_wr_en = $rd_valid ;
+         $rf_wr_index[4:0] = $rd ;
+         $rf_wr_data[31:0] = $result ;
          
 
       // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
