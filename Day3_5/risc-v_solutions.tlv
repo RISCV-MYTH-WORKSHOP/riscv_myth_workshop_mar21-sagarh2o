@@ -45,6 +45,20 @@
          $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
          $imem_rd_en = !$reset;
          $instr[31:0] = $imem_rd_data[31:0];
+         
+         $is_i_instr = $instr[6:2] ==? 5'b0000x ||
+                       $instr[6:2] ==? 5'b000x0 ||
+                       $instr[6:2] ==? 5'b11001;
+         $is_r_instr = $instr[6:2] ==? 5'b01011 ||
+                       $instr[6:2] ==? 5'b01100 ||
+                       $instr[6:2] ==? 5'b01110 ||
+                       $instr[6:2] ==? 5'b10100;
+         $is_s_instr = $instr[6:2] ==? 5'b01000 ||
+                       $instr[6:2] ==? 5'b01001;
+         $is_b_instr = $instr[6:2] ==? 5'b11000;
+         $is_j_instr = $instr[6:2] ==? 5'b11011;
+         $is_u_instr = $instr[6:2] ==? 5'b00101 ||
+                       $instr[6:2] ==? 5'b01101;
 
       // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
       //       be sure to avoid having unassigned signals (which you might be using for random inputs)
