@@ -50,7 +50,7 @@
          $instr[31:0] = $imem_rd_data[31:0];
          
          $is_i_instr = $instr[6:2] ==? 5'b0000x ||
-                       $instr[6:2] ==? 5'b000x0 ||
+                       $instr[6:2] ==? 5'b001x0 ||
                        $instr[6:2] == 5'b11001;
          $is_r_instr = $instr[6:2] == 5'b01011 ||
                        $instr[6:2] == 5'b01100 ||
@@ -63,11 +63,11 @@
          $is_u_instr = $instr[6:2] == 5'b00101 ||
                        $instr[6:2] == 5'b01101;
          
-         $imm[31:0] = $is_i_instr ? { {21{$instr[31]}}, $instr[30:20] } :
-                      $is_s_instr ? { {21{$instr[31]}}, $instr[30:25], $instr[11:7] } :
-                      $is_b_instr ? { {20{$instr[31]}}, $instr[7], $instr[30:25],$instr[11:8], 1'b0 } :
+         $imm[31:0] = $is_i_instr ? { { 21{$instr[31] } } , $instr[30:20] } :
+                      $is_s_instr ? { { 21{$instr[31] } } , $instr[30:25] , $instr[11:7] } :
+                      $is_b_instr ? { { 20{$instr[31] } } , $instr[7] , $instr[30:25] , $instr[11:8], 1'b0 } :
                       $is_u_instr ? { $instr[31:12], 12'b0 } :
-                      $is_j_instr ? { {12{$instr[31]}}, $instr[19:12], $instr[20],$instr[30:21], 1'b0 } : 32'b0;
+                      $is_j_instr ? { { 12{$instr[31] } }, $instr[19:12], $instr[20],$instr[30:21], 1'b0 } : 32'b0;
          
          $rs1_valid = $is_r_instr || $is_s_instr || $is_b_instr || $is_i_instr ;
          ?$rs1_valid
@@ -128,6 +128,7 @@
                      $is_bgeu ? ( $src1_value >= $src2_value ) : 1'b0 ;
          $br_tgt_pc[31:0] = $pc + $imm ;
          
+         *passed = |cpu/xreg[10]>>5$value == (1+2+3+4+5+6+7+8+9);
          
          
          
@@ -138,9 +139,9 @@
 
    
    // Assert these to end simulation (before Makerchip cycle limit).
-   *passed = *cyc_cnt > 40;
+   //*passed = *cyc_cnt > 40;
    *failed = 1'b0;
-   //*passed = |cpu/xreg[10]>>5$value == (1+2+3+4+5+6+7+8+9);
+   
    // Macro instantiations for:
    //  o instruction memory
    //  o register file
