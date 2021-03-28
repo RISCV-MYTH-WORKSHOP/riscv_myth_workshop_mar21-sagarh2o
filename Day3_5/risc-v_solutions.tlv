@@ -48,10 +48,15 @@
                   $start ? 1'b1 : >>3$valid ;
          
       @1   
+         //pc in @1
+         $inc_pc[31:0] = $pc + 32'd4 ;
+         
+         //fetch in @1
          $imem_rd_addr[M4_IMEM_INDEX_CNT-1:0] = $pc[M4_IMEM_INDEX_CNT+1:2];
          $imem_rd_en = !$reset;
          $instr[31:0] = $imem_rd_data[31:0];
          
+         //decode in @1
          $is_i_instr = $instr[6:2] ==? 5'b0000x ||
                        $instr[6:2] ==? 5'b001x0 ||
                        $instr[6:2] == 5'b11001;
@@ -108,6 +113,8 @@
          
          `BOGUS_USE($is_beq $is_bne $is_blt $is_bge $is_bltu $is_bgeu $is_addi $is_add)
          
+      @2   
+         //Register read @2
          $rf_rd_en1 = $rs1_valid ;
          $rf_rd_index1[4:0] = $rs1 ;
          $rf_rd_en2 = $rs2_valid ;
@@ -115,27 +122,28 @@
          
          $src1_value[31:0] = $rf_rd_data1 ;
          $src2_value[31:0] = $rf_rd_data2 ;
+         $br_tgt_pc[31:0] = $pc + $imm ;
          
+      @3   
+         //ALU @3
          $result[31:0] = $is_addi ? $src1_value + $imm :
                          $is_add ? $src1_value + $src2_value : 32'bx;
          
-         $rf_wr_en = ( $rd_valid && ( $rd != 5'b0 ) && ( $valid == 1'b1 ) ) ;
-         $rf_wr_index[4:0] = $rd ;
-         $rf_wr_data[31:0] = $result ;
-         
+         //taken branch
          $taken_br = $is_beq ? ( $src1_value == $src2_value ) :
                      $is_bne ? ( $src1_value != $src2_value ) :
                      $is_blt ? ( ( $src1_value < $src2_value ) ^ ( $src1_value[31] != $src2_value[31] ) ) :
                      $is_bge ? ( ( $src1_value >= $src2_value ) ^ ( $src1_value[31] != $src2_value[31] ) ) :
                      $is_bltu ? ( $src1_value < $src2_value ) :
                      $is_bgeu ? ( $src1_value >= $src2_value ) : 1'b0 ;
-         $br_tgt_pc[31:0] = $pc + $imm ;
-         //*passed = |cpu/xreg[10]>>5$value == (1+2+3+4+5+6+7+8+9);
-         
          $valid_taken_br = $valid && $taken_br ;
-         $inc_pc[31:0] = $pc + 32'd4 ;
          
+         //reg write
+         $rf_wr_en = ( $rd_valid && ( $rd != 5'b0 ) && ( $valid == 1'b1 ) ) ;
+         $rf_wr_index[4:0] = $rd ;
+         $rf_wr_data[31:0] = $result ;
          
+         //*passed = |cpu/xreg[10]>>5$value == (1+2+3+4+5+6+7+8+9);
          
          
 
@@ -156,7 +164,7 @@
    |cpu
       
       m4+imem(@1)    // Args: (read stage)
-      m4+rf(@1, @1)  // Args: (read stage, write stage) - if equal, no register bypass is required
+      m4+rf(@2, @3)  // Args: (read stage, write stage) - if equal, no register bypass is required
       //m4+dmem(@4)    // Args: (read/write stage)
    
    m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic
