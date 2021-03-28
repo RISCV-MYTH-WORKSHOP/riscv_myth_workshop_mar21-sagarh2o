@@ -42,7 +42,7 @@
          $reset = *reset;
          $pc[31:0] = >>1$reset ? 0 :
                      >>3$valid_taken_br ? >>3$br_tgt_pc :
-                     >>1$inc_pc;
+                     >>3$valid_load ? >>3$inc_pc : >>1$inc_pc;
          $start = ( >>1$reset == 1'b1 && $reset == 1'b0 ) ;
          
       @1   
@@ -194,7 +194,8 @@
          $rf_wr_data[31:0] = $result ;
          //*passed = |cpu/xreg[10]>>5$value == (1+2+3+4+5+6+7+8+9);
          //valid changed according to slide 42
-         $valid = !( >>1$valid_taken_br || >>2$valid_taken_br) ;
+         $valid_load = $valid && $is_load ;
+         $valid = !( >>1$valid_taken_br || >>2$valid_taken_br || >>1$valid_load || >>2$valid_load ) ;
          
 
       // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
