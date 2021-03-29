@@ -42,7 +42,10 @@
          $reset = *reset;
          $pc[31:0] = >>1$reset ? 0 :
                      >>3$valid_taken_br ? >>3$br_tgt_pc :
-                     >>3$valid_load ? >>3$inc_pc : >>1$inc_pc;
+                     >>3$valid_load ? >>3$inc_pc :
+                     >>3$valid_jump_jal ? >>3$br_tgt_pc :
+                     >>3$valid_jump_jalr ? >>3$jalr_tgt_pc :
+                     >>1$inc_pc;
          $start = ( >>1$reset == 1'b1 && $reset == 1'b0 ) ;
          
       @1   
@@ -188,6 +191,13 @@
                      $is_slti ? ( ( $src1_value[31] == $imm[31] ) ? $sltiu_rslt : {31'b0 , $src1_value[31]} ) :
                      $is_sra ? ( {{32{ $src1_value[31] }} , $src1_value } >> $src2_value[4:0] ) : 1'b0 ;
          $valid_taken_br = $valid && $taken_br ;
+         
+         //implementation of jump
+         $is_jump = $is_jal || $is_jalr ;
+         $valid_jump_jal = $valid && $is_jump && $is_jal ;
+         $valid_jump_jalr = $valid && $is_jump && $is_jalr ;
+         $jalr_tgt_pc = $src1_value + $imm ;
+         
          
          //reg write
          $rf_wr_en = ( $rd_valid && ( $rd != 5'b0 ) && ( $valid == 1'b1 ) ) || >>2$valid_load ;
