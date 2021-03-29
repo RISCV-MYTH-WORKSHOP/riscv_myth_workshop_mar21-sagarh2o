@@ -151,7 +151,8 @@
          
       @3   
          //ALU @3
-         $result[31:0] = $is_addi ? $src1_value + $imm :
+         $result[31:0] = ( $is_load || $is_s_instr ) ? $src1_value + $imm : 
+                         $is_addi ? $src1_value + $imm :
                          $is_add ? $src1_value + $src2_value : 32'bx;
          
          //taken branch
@@ -189,13 +190,22 @@
          $valid_taken_br = $valid && $taken_br ;
          
          //reg write
-         $rf_wr_en = ( $rd_valid && ( $rd != 5'b0 ) && ( $valid == 1'b1 ) ) ;
-         $rf_wr_index[4:0] = $rd ;
-         $rf_wr_data[31:0] = $result ;
+         $rf_wr_en = ( $rd_valid && ( $rd != 5'b0 ) && ( $valid == 1'b1 ) ) || >>2$valid_load ;
+         $rf_wr_index[4:0] = >>2$valid_load ? >>2$rd : $rd ;
+         $rf_wr_data[31:0] = >>2$valid_load ? >>2$ld_data : $result ;
          //*passed = |cpu/xreg[10]>>5$value == (1+2+3+4+5+6+7+8+9);
+         
          //valid changed according to slide 42
          $valid_load = $valid && $is_load ;
          $valid = !( >>1$valid_taken_br || >>2$valid_taken_br || >>1$valid_load || >>2$valid_load ) ;
+         
+      @4   
+         //data memory
+         $dmem_wr_en = $is_s_intr && $valid ;
+         $dmem_addr[3:0] = $result[5:2] ;
+         $dmem_wr_data[31:0] = $src2_value ;
+         $dmem_rd_en = $is_load ;
+         $dmem_rd_data =  ;
          
 
       // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
@@ -216,9 +226,11 @@
       
       m4+imem(@1)    // Args: (read stage)
       m4+rf(@2, @3)  // Args: (read stage, write stage) - if equal, no register bypass is required
-      //m4+dmem(@4)    // Args: (read/write stage)
+      m4+dmem(@4)    // Args: (read/write stage)
    
    m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic
                        // @4 would work for all labs
+   m4_asm(SW, r0, r10, 10000)
+   m4_asm(LW, r17, r0, 10000)
 \SV
    endmodule
