@@ -232,7 +232,7 @@
    
    m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic
                        // @4 would work for all labs
-   //m4_asm(SW, r0, r10, 10000)
-   //m4_asm(LW, r17, r0, 10000)  //slide 52
+   m4_asm(SW, r0, r10, 10000)
+   m4_asm(LW, r17, r0, 10000)  //slide 52
 \SV
    endmodule
