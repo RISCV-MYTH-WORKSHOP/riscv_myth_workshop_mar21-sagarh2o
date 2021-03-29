@@ -201,11 +201,13 @@
          
       @4   
          //data memory
-         $dmem_wr_en = $is_s_intr && $valid ;
+         $dmem_wr_en = $is_s_instr && $valid ;
          $dmem_addr[3:0] = $result[5:2] ;
          $dmem_wr_data[31:0] = $src2_value ;
          $dmem_rd_en = $is_load ;
-         $dmem_rd_data =  ;
+         
+      @5   
+         $ld_data[31:0] = $dmem_rd_data [31:0] ;
          
 
       // Note: Because of the magic we are using for visualisation, if visualisation is enabled below,
@@ -230,7 +232,7 @@
    
    m4+cpu_viz(@4)    // For visualisation, argument should be at least equal to the last stage of CPU logic
                        // @4 would work for all labs
-   m4_asm(SW, r0, r10, 10000)
-   m4_asm(LW, r17, r0, 10000)
+   //m4_asm(SW, r0, r10, 10000)
+   //m4_asm(LW, r17, r0, 10000)  //slide 52
 \SV
    endmodule
